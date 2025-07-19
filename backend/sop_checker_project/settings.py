@@ -8,9 +8,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-change-this-in-production')
 
-DEBUG = True
+# Production settings for Railway
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    'localhost', 
+    '127.0.0.1',
+    '.railway.app',  # Allow all Railway subdomains
+    '.vercel.app',   # Allow Vercel domains for CORS
+]
+
+# Get Railway domain if available
+RAILWAY_STATIC_URL = os.getenv('RAILWAY_STATIC_URL')
+if RAILWAY_STATIC_URL:
+    ALLOWED_HOSTS.append(RAILWAY_STATIC_URL)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -26,6 +37,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add WhiteNoise for static files
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -88,7 +100,12 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = 'static/'
+# Static files configuration for Railway
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# WhiteNoise configuration
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -99,10 +116,20 @@ REST_FRAMEWORK = {
     ]
 }
 
-# CORS settings
+# CORS settings - updated for production
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+]
+
+# Add Vercel domain when available
+VERCEL_URL = os.getenv('VERCEL_URL')
+if VERCEL_URL:
+    CORS_ALLOWED_ORIGINS.append(f"https://{VERCEL_URL}")
+
+# Allow all Vercel preview deployments
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.vercel\.app$",
 ]
 
 CORS_ALLOW_CREDENTIALS = True 
