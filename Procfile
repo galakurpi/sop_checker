@@ -1,0 +1,1 @@
+   web: gunicorn backend.sop_checker_project.wsgi --host 0.0.0.0 --port $PORT
