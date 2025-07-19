@@ -1,1 +1,1 @@
-web: gunicorn backend.sop_checker_project.wsgi --bind 0.0.0.0:$PORT
+web: PYTHONPATH=backend gunicorn backend.sop_checker_project.wsgi --bind 0.0.0.0:$PORT
